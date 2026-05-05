@@ -1,16 +1,39 @@
 ## Backend Final Project
 
-## Description
+## Descripcion
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+## Estructura
+
+```
+src/
+├── domain/                      # CAPA 1: Reglas de Negocio (Pura)
+│   ├── models/                  # Entidades (User, Course, Challenge)
+│   ├── repositories/            # Interfaces/Puertos (Contratos)
+│   └── exceptions/              # Errores personalizados
+├── use-cases/                   # CAPA 2: Casos de Uso (Lógica)
+│   ├── auth/                    # Login, Register
+│   ├── courses/                 # CreateCourse, ListCourses
+│   └── challenges/              # CreateChallenge, UploadSchema
+├── infrastructure/              # CAPA 3: Implementación (NestJS/DB)
+│   ├── common/                  # Filtros, Interceptors, Decorators
+│   ├── config/                  # TypeORM, Redis, Environment vars
+│   ├── controllers/             # Entry points (HTTP)
+│   ├── persistence/             # Mappers y Repositorios (TypeORM)
+│   │   └── entities/            # Esquemas de BD (Decoradores @Entity)
+│   └── services/                # Implementaciones (Bcrypt, JWT, Redis)
+├── app.module.ts                # Unión de todas las capas
+└── main.ts                      # Configuración de la aplicación
+```
+
+## Primeros Pasos
 
 ```bash
 npm install
 ```
 
-## Compile and run the project
+## Compilar y ejectar el proyecto
 
 ```bash
 # development
@@ -23,7 +46,7 @@ npm run start:dev
 npm run start:prod
 ```
 
-## Run tests
+## Pruebas
 
 ```bash
 # unit tests
@@ -35,19 +58,6 @@ npm run test:e2e
 # test coverage
 npm run test:cov
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-npm install -g @nestjs/mau
-mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 
 ## Resources
 
