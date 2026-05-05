@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  PROFESSOR
+  STUDENT
+}
+
+enum ChallengeStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  QUEUED
+  RUNNING
+  ACCEPTED
+  WRONG_ANSWER
+  SYNTAX_ERROR
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  OPTIMIZATION_REQUIRED
+}
+
+// ─── MODELS ───────────────────────────────────────
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  name        String
+  password    String
+  role        Role         @default(STUDENT)
+
+  // Relaciones
+  courses     Course[]     @relation("ProfessorCourses")
+  enrollments Enrollment[]
+  challenges  Challenge[]
+  submissions Submission[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("users")
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  name        String
+  code        String       @unique
+  period      String
+  groupName   String       // "group" es palabra reservada en SQL
+
+  professor   User         @relation("ProfessorCourses", fields: [professorId], references: [id], onDelete: Cascade)
+  professorId String
+
+  students    Enrollment[]
+  challenges  Challenge[]
+  evaluations Evaluation[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("courses")
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  String
+
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
+  @@map("enrollments")
+}
+
+model Challenge {
+  id             String          @id @default(uuid())
+  title          String
+  description    String
+  difficulty     Difficulty      @default(MEDIUM)
+  tags           String[]
+  databaseEngine String          @default("PostgreSQL")
+  timeLimit      Int             @default(2000)       // milisegundos
+  status         ChallengeStatus @default(DRAFT)
+
+  schemaSql      String?         // Script DDL del profesor
+  seedDataSql    String?         // INSERTs de datos de prueba
+  expectedResult Json?           // Resultado esperado (filas/columnas)
+
+  course         Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId       String
+  author         User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId       String
+
+  submissions    Submission[]
+  evaluationChallenges EvaluationChallenge[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("challenges")
+}
+
+model Submission {
+  id             String           @id @default(uuid())
+  query          String           // SQL enviado por el estudiante
+  status         SubmissionStatus @default(QUEUED)
+  score          Int?
+  executionTimeMs Int?
+  testResults    Json?            // Detalle de test cases
+  feedback       String?          // Recomendaciones del asistente IA
+
+  student        User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId      String
+  challenge      Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId    String
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("submissions")
+}
+
+// ─── EVALUACIONES (base para Entrega 2) ───────────
+
+model Evaluation {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
+  durationMinutes Int
+  maxAttempts    Int       @default(1)
+  showResults    Boolean   @default(false)
+
+  course         Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        String
+
+  challenges     EvaluationChallenge[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("evaluations")
+}
+
+model EvaluationChallenge {
+  id            String     @id @default(uuid())
+  evaluation    Evaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  evaluationId  String
+  challenge     Challenge  @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId   String
+
+  @@unique([evaluationId, challengeId])
+  @@map("evaluation_challenges")
+}
