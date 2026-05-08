@@ -6,6 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY prisma ./prisma
+COPY prisma.config.ts ./
+ENV DATABASE_URL="postgresql://user_admin:password123@postgres:5432/sql_judge_platform?schema=public"
 RUN npx prisma generate
 
 COPY . .
@@ -22,4 +24,4 @@ COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
