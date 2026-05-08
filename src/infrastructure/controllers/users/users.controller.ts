@@ -51,7 +51,8 @@ export class UsersController {
     @Get()
     @Roles(Role.ADMIN)
     async findAll() {
-        return this.userRepository.findAll();
+        const users = await this.userRepository.findAll();
+        return users.map(sanitizeUser);
     }
 
     // GET /users/:id — solo ADMIN
