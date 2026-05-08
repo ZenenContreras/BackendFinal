@@ -33,7 +33,7 @@ export class ChallengesController {
   @Post()
   @Roles(Role.PROFESSOR)
   create(@Body() dto: CreateChallengeDto, @Request() req) {
-    return this.challengesService.create(dto, req.user.id);
+    return this.challengesService.create(dto, req.user.userId);
   }
 
   @Get()
