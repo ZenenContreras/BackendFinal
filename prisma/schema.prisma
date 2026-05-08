@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -40,11 +41,11 @@ enum SubmissionStatus {
 // ─── MODELS ───────────────────────────────────────
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  name        String
-  password    String
-  role        Role         @default(STUDENT)
+  id              String       @id @default(uuid())
+  email           String       @unique
+  name            String
+  passwordHash    String
+  role            Role         @default(STUDENT)
 
   // Relaciones
   courses     Course[]     @relation("ProfessorCourses")
