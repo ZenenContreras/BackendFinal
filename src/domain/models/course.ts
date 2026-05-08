@@ -7,8 +7,8 @@ export class Course {
   period: string;
   groupName: string;
   professorId: string;
-  professor?: Omit<User, 'password'>;
-  students?: Array<Omit<User, 'password'>>;
+  professor?: Omit<User, 'passwordHash'>;
+  students?: Array<Omit<User, 'passwordHash'>>;
   createdAt?: Date;
   updatedAt?: Date;
 }

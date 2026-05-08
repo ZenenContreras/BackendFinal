@@ -20,14 +20,14 @@ type PrismaCourseWithRelations = {
     id: string;
     name: string;
     email: string;
-    role: 'ADMIN' | 'PROFESSOR' | 'STUDENT';
+    role: string;
   };
   students?: Array<{
     student: {
       id: string;
       name: string;
       email: string;
-      role: 'ADMIN' | 'PROFESSOR' | 'STUDENT';
+      role: string;
     };
   }>;
 };
@@ -155,8 +155,8 @@ export class PrismaCourseRepository implements ICourseRepository {
       period: course.period,
       groupName: course.groupName,
       professorId: course.professorId,
-      professor: course.professor,
-      students: course.students?.map((enrollment) => enrollment.student) ?? [],
+      professor: course.professor as Course['professor'],
+      students: course.students?.map((enrollment) => enrollment.student) as Course['students'] ?? [],
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
     };
