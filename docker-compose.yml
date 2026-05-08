@@ -12,12 +12,40 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_admin -d sql_judge_platform"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
     container_name: sql_judge_queue
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: sql_judge_api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://user_admin:password123@postgres:5432/sql_judge_platform?schema=public"
+      JWT_SECRET: "tu-secreto-super-seguro-aqui"
+      JWT_EXPIRATION: "24h"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
